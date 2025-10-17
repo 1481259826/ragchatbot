@@ -64,8 +64,8 @@ See [CLAUDE.md](./CLAUDE.md) for detailed architectural documentation.
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
-   cd YOUR_REPO_NAME
+   git clone https://github.com/1481259826/ragchatbot.git
+   cd ragchatbot
    ```
 
 2. **Install uv** (if not already installed)
