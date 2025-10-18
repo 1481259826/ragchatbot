@@ -89,6 +89,7 @@ class CourseSearchTool(Tool):
         """Format search results with course and lesson context"""
         formatted = []
         sources = []  # Track sources for the UI
+        seen_sources = set()  # Track unique source combinations to avoid duplicates
 
         for doc, meta in zip(results.documents, results.metadata):
             course_title = meta.get('course_title', 'unknown')
@@ -110,11 +111,16 @@ class CourseSearchTool(Tool):
             if lesson_num is not None:
                 lesson_link = self.store.get_lesson_link(course_title, lesson_num)
 
-            # Store source as dict with text and optional link
-            sources.append({
-                "text": source_text,
-                "link": lesson_link
-            })
+            # Create unique identifier for this source (text + link combination)
+            source_id = (source_text, lesson_link)
+
+            # Only add source if we haven't seen this exact combination
+            if source_id not in seen_sources:
+                sources.append({
+                    "text": source_text,
+                    "link": lesson_link
+                })
+                seen_sources.add(source_id)
 
             formatted.append(f"{header}\n{doc}")
 
@@ -172,16 +178,19 @@ class CourseOutlineTool(Tool):
         """Format course outline for display"""
         formatted_parts = []
         sources = []  # Track sources for the UI
+        seen_links = set()  # Track unique links to avoid duplicates
 
         # Course title
         formatted_parts.append(f"Course: {outline['course_title']}")
 
         # Course link (if available) - store as source instead of inline
-        if outline.get('course_link'):
+        course_link = outline.get('course_link')
+        if course_link and course_link not in seen_links:
             sources.append({
                 "text": f"View Course: {outline['course_title']}",
-                "link": outline['course_link']
+                "link": course_link
             })
+            seen_links.add(course_link)
 
         # Instructor (if available)
         if outline.get('instructor'):
@@ -196,13 +205,14 @@ class CourseOutlineTool(Tool):
                 lesson_title = lesson.get('lesson_title')
                 lesson_line = f"  Lesson {lesson_num}: {lesson_title}"
 
-                # Store lesson link as source instead of inline
+                # Store lesson link as source instead of inline (only if unique)
                 lesson_link = lesson.get('lesson_link')
-                if lesson_link:
+                if lesson_link and lesson_link not in seen_links:
                     sources.append({
                         "text": f"Lesson {lesson_num}: {lesson_title}",
                         "link": lesson_link
                     })
+                    seen_links.add(lesson_link)
 
                 formatted_parts.append(lesson_line)
         else:
