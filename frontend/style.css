@@ -254,18 +254,33 @@ header h1 {
     text-decoration: none;
     transition: all 0.2s ease;
     border: 1px solid rgba(96, 165, 250, 0.3);
-    padding: 0.5rem 0.75rem;
-    border-radius: 6px;
+    padding: 0.625rem 1rem;
+    border-radius: 8px;
     background: rgba(96, 165, 250, 0.1);
-    display: block;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
     line-height: 1.4;
+    font-weight: 500;
+    font-size: 0.875rem;
+    max-width: 100%;
+    word-break: break-word;
+}
+
+.sources-content a:link::before,
+.sources-content a:any-link::before {
+    content: "→";
+    font-size: 1rem;
+    font-weight: bold;
+    flex-shrink: 0;
 }
 
 .sources-content a:hover {
     color: #93c5fd !important;
     background: rgba(96, 165, 250, 0.2);
     border-color: #60a5fa;
-    transform: translateX(2px);
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(96, 165, 250, 0.2);
 }
 
 .sources-content a:visited {
@@ -278,7 +293,8 @@ header h1 {
     color: #d8b4fe !important;
     background: rgba(192, 132, 252, 0.2);
     border-color: #c084fc;
-    transform: translateX(2px);
+    transform: translateX(4px);
+    box-shadow: 0 2px 8px rgba(192, 132, 252, 0.2);
 }
 
 /* Markdown formatting styles */
