@@ -71,16 +71,21 @@ class RAGSystem:
             self.vector_store.clear_all_data()
         
         if not os.path.exists(folder_path):
-            print(f"Folder {folder_path} does not exist")
+            print(f"✗ Folder {folder_path} does not exist")
             return 0, 0
-        
+
         # Get existing course titles to avoid re-processing
         existing_course_titles = set(self.vector_store.get_existing_course_titles())
-        
+        print(f"Found {len(existing_course_titles)} existing courses in DB")
+
         # Process each file in the folder
-        for file_name in os.listdir(folder_path):
+        files_found = list(os.listdir(folder_path))
+        print(f"Found {len(files_found)} files in {folder_path}")
+
+        for file_name in files_found:
             file_path = os.path.join(folder_path, file_name)
             if os.path.isfile(file_path) and file_name.lower().endswith(('.pdf', '.docx', '.txt')):
+                print(f"Processing: {file_name}")
                 try:
                     # Check if this course might already exist
                     # We'll process the document to get the course ID, but only add if new
