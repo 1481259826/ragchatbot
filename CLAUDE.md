@@ -136,4 +136,4 @@ Settings in backend/config.py:
 - First chunk of each lesson gets "Lesson X content:" prefix
 - Last lesson chunks get "Course Y Lesson X content:" prefix for better retrieval
 - Overlap calculated in characters, applied at sentence boundaries
-- use uv to run python files
+- make sure use uv to run python files
