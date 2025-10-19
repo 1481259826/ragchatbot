@@ -2,12 +2,13 @@
 Real system test to diagnose the "Query failed" issue
 This test runs against the actual system with real components
 """
-import sys
-import os
+
 import io
+import os
+import sys
 
 # Set UTF-8 encoding for Windows console
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -38,6 +39,7 @@ try:
 except Exception as e:
     print(f"✗ Failed to initialize RAG system: {e}")
     import traceback
+
     traceback.print_exc()
     sys.exit(1)
 
@@ -48,13 +50,18 @@ try:
     print(f"✓ Found {course_count} courses in vector store")
 
     if course_count == 0:
-        print("  WARNING: No courses loaded. The system won't be able to answer content queries.")
+        print(
+            "  WARNING: No courses loaded. The system won't be able to answer content queries."
+        )
     else:
         course_titles = rag.vector_store.get_existing_course_titles()
-        print(f"  Courses: {', '.join(course_titles[:3])}{'...' if len(course_titles) > 3 else ''}")
+        print(
+            f"  Courses: {', '.join(course_titles[:3])}{'...' if len(course_titles) > 3 else ''}"
+        )
 except Exception as e:
     print(f"✗ Error checking vector store: {e}")
     import traceback
+
     traceback.print_exc()
 
 # Test tool manager
@@ -67,6 +74,7 @@ try:
 except Exception as e:
     print(f"✗ Error checking tools: {e}")
     import traceback
+
     traceback.print_exc()
 
 # Test a simple search tool execution (without AI)
@@ -74,8 +82,7 @@ print("\n4. Testing search tool directly...")
 try:
     # Manually execute search tool
     result = rag.tool_manager.execute_tool(
-        "search_course_content",
-        query="What is MCP?"
+        "search_course_content", query="What is MCP?"
     )
 
     if "error" in result.lower() or "no" in result.lower()[:20]:
@@ -93,6 +100,7 @@ try:
 except Exception as e:
     print(f"✗ Search tool execution failed: {e}")
     import traceback
+
     traceback.print_exc()
 
 # Test AI generator
@@ -112,6 +120,7 @@ try:
 except Exception as e:
     print(f"✗ AI generator check failed: {e}")
     import traceback
+
     traceback.print_exc()
 
 # Test a full query (this will make a real API call)
@@ -148,6 +157,7 @@ try:
 except Exception as e:
     print(f"   ✗ Query failed with exception: {e}")
     import traceback
+
     traceback.print_exc()
 
 print("\n" + "=" * 70)

@@ -1,12 +1,13 @@
 """
 Test document loading to diagnose why courses aren't in vector store
 """
-import sys
-import os
+
 import io
+import os
+import sys
 
 # Set UTF-8 encoding for Windows console
-sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -54,6 +55,7 @@ try:
 except Exception as e:
     print(f"   ✗ Error loading documents: {e}")
     import traceback
+
     traceback.print_exc()
 
 # Check final state
@@ -68,6 +70,7 @@ if course_count > 0:
     # Test a search
     print("\n5. Testing search...")
     from vector_store import SearchResults
+
     results = rag.vector_store.search("MCP", limit=2)
 
     if results.error:

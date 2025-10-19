@@ -13,12 +13,68 @@ This is a Retrieval-Augmented Generation (RAG) system for querying course materi
 # Install dependencies
 uv sync
 
+# Install dev dependencies (includes code quality tools)
+uv sync --extra dev
+
 # Run the application (starts on port 8000)
 ./run.sh
 
 # Or manually from backend directory
 cd backend && uv run uvicorn app:app --reload --port 8000
 ```
+
+### Code Quality Tools
+
+The project includes automated code quality tools configured in `pyproject.toml`:
+
+**Windows:**
+```bash
+# Format code with black and isort
+scripts\format.bat
+
+# Run linting checks (flake8 + mypy)
+scripts\lint.bat
+
+# Run all quality checks (format check, lint, tests)
+scripts\quality-check.bat
+```
+
+**Linux/Mac:**
+```bash
+# Format code with black and isort
+./scripts/format.sh
+
+# Run linting checks (flake8 + mypy)
+./scripts/lint.sh
+
+# Run all quality checks (format check, lint, tests)
+./scripts/quality-check.sh
+```
+
+**Manual commands:**
+```bash
+# Format code
+uv run black backend/ main.py
+uv run isort backend/ main.py
+
+# Check formatting without modifying
+uv run black --check backend/ main.py
+uv run isort --check-only backend/ main.py
+
+# Lint code
+uv run flake8 backend/ main.py
+uv run mypy backend/ main.py
+
+# Run tests with coverage
+cd backend && uv run pytest
+```
+
+**Quality Standards:**
+- **Black**: Line length 88, Python 3.13 target
+- **isort**: Black-compatible import sorting
+- **flake8**: Max line length 88, ignores E203, W503, E501
+- **mypy**: Type checking with relaxed settings for rapid development
+- **pytest**: Full test suite with coverage reporting
 
 ### Environment Setup
 Create a `.env` file in the root directory:

@@ -1,11 +1,13 @@
 """
 Tests for AIGenerator tool-calling behavior
 """
-import pytest
-import sys
+
 import os
-from unittest.mock import Mock, MagicMock, patch
+import sys
 from dataclasses import dataclass
+from unittest.mock import MagicMock, Mock, patch
+
+import pytest
 
 # Add parent directory to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -40,7 +42,7 @@ class TestAIGenerator:
     @pytest.fixture
     def mock_anthropic_client(self):
         """Create a mock Anthropic client"""
-        with patch('anthropic.Anthropic') as mock_client_class:
+        with patch("anthropic.Anthropic") as mock_client_class:
             mock_client = Mock()
             mock_client_class.return_value = mock_client
             yield mock_client
@@ -55,7 +57,7 @@ class TestAIGenerator:
         # Mock response without tool use
         mock_response = MockResponse(
             content=[MockTextBlock(text="This is a test response")],
-            stop_reason="end_turn"
+            stop_reason="end_turn",
         )
         mock_anthropic_client.messages.create = Mock(return_value=mock_response)
 
@@ -63,7 +65,7 @@ class TestAIGenerator:
             query="What is 2+2?",
             conversation_history=None,
             tools=None,
-            tool_manager=None
+            tool_manager=None,
         )
 
         assert result == "This is a test response"
@@ -74,11 +76,12 @@ class TestAIGenerator:
         assert call_args[1]["messages"][0]["content"] == "What is 2+2?"
         assert "tools" not in call_args[1]
 
-    def test_generate_response_with_conversation_history(self, ai_generator, mock_anthropic_client):
+    def test_generate_response_with_conversation_history(
+        self, ai_generator, mock_anthropic_client
+    ):
         """Test that conversation history is included in system prompt"""
         mock_response = MockResponse(
-            content=[MockTextBlock(text="Response")],
-            stop_reason="end_turn"
+            content=[MockTextBlock(text="Response")], stop_reason="end_turn"
         )
         mock_anthropic_client.messages.create = Mock(return_value=mock_response)
 
@@ -87,7 +90,7 @@ class TestAIGenerator:
             query="New question",
             conversation_history=history,
             tools=None,
-            tool_manager=None
+            tool_manager=None,
         )
 
         # Check that history was added to system prompt
@@ -96,25 +99,27 @@ class TestAIGenerator:
         assert "Previous question" in system_content
         assert "Previous answer" in system_content
 
-    def test_generate_response_with_tools_but_no_tool_use(self, ai_generator, mock_anthropic_client):
+    def test_generate_response_with_tools_but_no_tool_use(
+        self, ai_generator, mock_anthropic_client
+    ):
         """Test response when tools are available but not used"""
         mock_response = MockResponse(
             content=[MockTextBlock(text="Direct answer without tools")],
-            stop_reason="end_turn"
+            stop_reason="end_turn",
         )
         mock_anthropic_client.messages.create = Mock(return_value=mock_response)
 
-        tool_defs = [{
-            "name": "search_course_content",
-            "description": "Search for content",
-            "input_schema": {"type": "object", "properties": {}}
-        }]
+        tool_defs = [
+            {
+                "name": "search_course_content",
+                "description": "Search for content",
+                "input_schema": {"type": "object", "properties": {}},
+            }
+        ]
         mock_tool_manager = Mock()
 
         result = ai_generator.generate_response(
-            query="What is AI?",
-            tools=tool_defs,
-            tool_manager=mock_tool_manager
+            query="What is AI?", tools=tool_defs, tool_manager=mock_tool_manager
         )
 
         assert result == "Direct answer without tools"
@@ -128,7 +133,9 @@ class TestAIGenerator:
         # Tool manager should not have been called
         mock_tool_manager.execute_tool.assert_not_called()
 
-    def test_generate_response_with_tool_execution(self, ai_generator, mock_anthropic_client):
+    def test_generate_response_with_tool_execution(
+        self, ai_generator, mock_anthropic_client
+    ):
         """Test tool execution workflow"""
         # First response triggers tool use
         tool_use_response = MockResponse(
@@ -137,16 +144,16 @@ class TestAIGenerator:
                     type="tool_use",
                     name="search_course_content",
                     id="tool_123",
-                    input={"query": "MCP basics", "course_name": "MCP"}
+                    input={"query": "MCP basics", "course_name": "MCP"},
                 )
             ],
-            stop_reason="tool_use"
+            stop_reason="tool_use",
         )
 
         # Second response after tool execution
         final_response = MockResponse(
             content=[MockTextBlock(text="Based on the search, MCP stands for...")],
-            stop_reason="end_turn"
+            stop_reason="end_turn",
         )
 
         mock_anthropic_client.messages.create = Mock(
@@ -162,16 +169,12 @@ class TestAIGenerator:
         tool_defs = [{"name": "search_course_content"}]
 
         result = ai_generator.generate_response(
-            query="What is MCP?",
-            tools=tool_defs,
-            tool_manager=mock_tool_manager
+            query="What is MCP?", tools=tool_defs, tool_manager=mock_tool_manager
         )
 
         # Verify tool was executed
         mock_tool_manager.execute_tool.assert_called_once_with(
-            "search_course_content",
-            query="MCP basics",
-            course_name="MCP"
+            "search_course_content", query="MCP basics", course_name="MCP"
         )
 
         # Verify final response
@@ -183,19 +186,15 @@ class TestAIGenerator:
     def test_tool_execution_message_sequence(self, ai_generator, mock_anthropic_client):
         """Test that tool execution creates correct message sequence"""
         tool_use_block = MockToolUseBlock(
-            name="search_course_content",
-            id="tool_456",
-            input={"query": "test query"}
+            name="search_course_content", id="tool_456", input={"query": "test query"}
         )
 
         tool_use_response = MockResponse(
-            content=[tool_use_block],
-            stop_reason="tool_use"
+            content=[tool_use_block], stop_reason="tool_use"
         )
 
         final_response = MockResponse(
-            content=[MockTextBlock(text="Final answer")],
-            stop_reason="end_turn"
+            content=[MockTextBlock(text="Final answer")], stop_reason="end_turn"
         )
 
         mock_anthropic_client.messages.create = Mock(
@@ -208,7 +207,7 @@ class TestAIGenerator:
         ai_generator.generate_response(
             query="Query",
             tools=[{"name": "search_course_content"}],
-            tool_manager=mock_tool_manager
+            tool_manager=mock_tool_manager,
         )
 
         # Check the second API call (after tool execution)
@@ -238,22 +237,17 @@ class TestAIGenerator:
         tool_use_response = MockResponse(
             content=[
                 MockToolUseBlock(
-                    name="search_course_content",
-                    id="tool_1",
-                    input={"query": "query1"}
+                    name="search_course_content", id="tool_1", input={"query": "query1"}
                 ),
                 MockToolUseBlock(
-                    name="search_course_content",
-                    id="tool_2",
-                    input={"query": "query2"}
-                )
+                    name="search_course_content", id="tool_2", input={"query": "query2"}
+                ),
             ],
-            stop_reason="tool_use"
+            stop_reason="tool_use",
         )
 
         final_response = MockResponse(
-            content=[MockTextBlock(text="Combined answer")],
-            stop_reason="end_turn"
+            content=[MockTextBlock(text="Combined answer")], stop_reason="end_turn"
         )
 
         mock_anthropic_client.messages.create = Mock(
@@ -261,14 +255,12 @@ class TestAIGenerator:
         )
 
         mock_tool_manager = Mock()
-        mock_tool_manager.execute_tool = Mock(
-            side_effect=["Result 1", "Result 2"]
-        )
+        mock_tool_manager.execute_tool = Mock(side_effect=["Result 1", "Result 2"])
 
         ai_generator.generate_response(
             query="Query",
             tools=[{"name": "search_course_content"}],
-            tool_manager=mock_tool_manager
+            tool_manager=mock_tool_manager,
         )
 
         # Both tools should be executed
@@ -277,8 +269,7 @@ class TestAIGenerator:
     def test_api_parameters(self, ai_generator, mock_anthropic_client):
         """Test that correct API parameters are used"""
         mock_response = MockResponse(
-            content=[MockTextBlock(text="Response")],
-            stop_reason="end_turn"
+            content=[MockTextBlock(text="Response")], stop_reason="end_turn"
         )
         mock_anthropic_client.messages.create = Mock(return_value=mock_response)
 
@@ -294,8 +285,7 @@ class TestAIGenerator:
     def test_system_prompt_structure(self, ai_generator, mock_anthropic_client):
         """Test that system prompt contains expected instructions"""
         mock_response = MockResponse(
-            content=[MockTextBlock(text="Response")],
-            stop_reason="end_turn"
+            content=[MockTextBlock(text="Response")], stop_reason="end_turn"
         )
         mock_anthropic_client.messages.create = Mock(return_value=mock_response)
 
@@ -310,27 +300,25 @@ class TestAIGenerator:
         # Updated to check for multi-round capability
         assert "TWO times per query" in system_prompt or "up to TWO" in system_prompt
 
-    def test_tool_execution_without_tool_manager(self, ai_generator, mock_anthropic_client):
+    def test_tool_execution_without_tool_manager(
+        self, ai_generator, mock_anthropic_client
+    ):
         """Test that tool use without tool_manager returns text response"""
         # Response that wants to use tools
         tool_use_response = MockResponse(
             content=[
                 MockToolUseBlock(
-                    name="search_course_content",
-                    id="tool_999",
-                    input={"query": "test"}
+                    name="search_course_content", id="tool_999", input={"query": "test"}
                 )
             ],
-            stop_reason="tool_use"
+            stop_reason="tool_use",
         )
 
         mock_anthropic_client.messages.create = Mock(return_value=tool_use_response)
 
         # Call without tool_manager
         result = ai_generator.generate_response(
-            query="Query",
-            tools=[{"name": "search_course_content"}],
-            tool_manager=None
+            query="Query", tools=[{"name": "search_course_content"}], tool_manager=None
         )
 
         # Should return empty string since there's no text block
