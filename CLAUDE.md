@@ -193,3 +193,4 @@ Settings in backend/config.py:
 - Last lesson chunks get "Course Y Lesson X content:" prefix for better retrieval
 - Overlap calculated in characters, applied at sentence boundaries
 - make sure use uv to run python files
+- 运行python文件时一定要先用conda actiavte ragchatbot命令激活虚拟环境
