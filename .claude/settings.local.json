@@ -5,7 +5,11 @@
       "Bash(git commit:*)",
       "Bash(git merge quality_feature)",
       "Bash(git merge testing_feature)",
-      "Bash(git merge ui_feature)"
+      "Bash(git merge ui_feature)",
+      "Bash(git worktree list)",
+      "Bash(git worktree remove .trees/quality_feature)",
+      "Bash(git worktree remove .trees/testing_feature)",
+      "Bash(git worktree remove .trees/ui_feature)"
     ],
     "deny": [],
     "ask": []
